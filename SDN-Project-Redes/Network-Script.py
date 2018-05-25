@@ -25,7 +25,7 @@ from mininet.link import Link, TCLink
 def projectNet():
 
     "Create an empty network and add nodes to it."
-	
+
     net = Mininet( controller=RemoteController, link=TCLink, switch=OVSKernelSwitch)
 
     info( '*** Adding controller\n' )
@@ -54,23 +54,22 @@ def projectNet():
 
     info( '*** Creating links\n' )
     for i in range (number_components):
-		net.addLink(Clients[i], Switches[i])
-		net.addLink(Servers[i], Switches[i])
+      net.addLink(Clients[i], Switches[i])
+      net.addLink(Servers[i], Switches[i])
     for i in range (number_components):
-       	net.addLink(Switches[i%3], Switches[(i+1)%3])
+      net.addLink(Switches[i%3], Switches[(i+1)%3])
 
-	info('***Setting switches to openflow 1.3\n')   	
-	Switches[0].cmd('ovs-vsctl set Bridge switch1 protocols=OpenFlow13')
-	Switches[1].cmd('ovs-vsctl set Bridge switch2 protocols=OpenFlow13')
-	Switches[2].cmd('ovs-vsctl set Bridge switch3 protocols=OpenFlow13')
+    info('***Setting switches to openflow 1.3\n')
+    for i in range(number_components):
+      Switches[i].cmd('ovs-vsctl set Bridge switch%d protocols=OpenFlow13' % (i+1) )
 
-	info( '*** Starting network\n')
-	net.start()
+    info( '*** Starting network\n')
+    net.start()
 
-	info( '*** Running CLI\n' )
-	CLI( net )
+    info( '*** Running CLI\n' )
+    CLI( net )
 
-	info( '*** Stopping network' )
+    info( '*** Stopping network' )
     net.stop()
 
 if __name__ == '__main__':
