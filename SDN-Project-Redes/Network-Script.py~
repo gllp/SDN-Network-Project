@@ -17,18 +17,19 @@ Also, the serveri and clienti connect with the switchi.
 """
 
 from mininet.net import Mininet
-from mininet.node import Controller
+from mininet.node import Controller, RemoteController, OVSKernelSwitch, UserSwitch
 from mininet.cli import CLI
 from mininet.log import setLogLevel, info
+from mininet.link import Link, TCLink
 
 def projectNet():
 
     "Create an empty network and add nodes to it."
 	
-    net = Mininet( controller=Controller )
+    net = Mininet( controller=RemoteController, link=TCLink, switch=OVSKernelSwitch)
 
     info( '*** Adding controller\n' )
-    net.addController( 'c0' )
+    net.addController( 'c0', controller=RemoteController, ip='127.0.0.1', port=6633 )
     
     #number of components in the network
     number_components = 3
@@ -36,16 +37,19 @@ def projectNet():
     info( '*** Adding hosts\n' )
     Clients = []
     Servers = []
+    Ips = ['10.0.0.1/24', '10.0.0.2/24', '10.0.0.3/24', '10.0.0.4/24', '10.0.0.5/24', '10.0.0.6/24']
+    Macs = ['00:00:00:00:00:01', '00:00:00:00:00:02', '00:00:00:00:00:03', '00:00:00:00:00:04', '00:00:00:00:00:05', '00:00:00:00:00:06', '00:00:00:00:00:07', '00:00:00:00:00:08', '00:00:00:00:00:09']
     for i in range(1,number_components+1):
-     	client = net.addHost( 'client%d' % i )
-      	server = net.addHost( 'server%d' % i )
+     	client = net.addHost( 'client%d' % i, mac=Macs[i-1], ip=Ips[i-1] )
+      	server = net.addHost( 'server%d' % i, mac=Macs[i+2], ip=Ips[i+2] )
       	Clients.append(client)
        	Servers.append(server)
 
     info( '*** Adding switch\n' )
     Switches = []
+    Listen_Ports = [6673,6674,6675]
     for i in range(1,number_components + 1):
-       	switch = net.addSwitch( 'switch%d' % i )
+       	switch = net.addSwitch( 'switch%d' % i, mac=Macs[i+5], listenPort=Listen_Ports[i-1])
        	Switches.append(switch)
 
     info( '*** Creating links\n' )
@@ -55,13 +59,18 @@ def projectNet():
     for i in range (number_components):
        	net.addLink(Switches[i%3], Switches[(i+1)%3])
 
-    info( '*** Starting network\n')
-    net.start()
+	info('***Setting switches to openflow 1.3\n')   	
+	Switches[0].cmd('ovs-vsctl set Bridge switch1 protocols=OpenFlow13')
+	Switches[1].cmd('ovs-vsctl set Bridge switch2 protocols=OpenFlow13')
+	Switches[2].cmd('ovs-vsctl set Bridge switch3 protocols=OpenFlow13')
 
-    info( '*** Running CLI\n' )
-    CLI( net )
+	info( '*** Starting network\n')
+	net.start()
 
-    info( '*** Stopping network' )
+	info( '*** Running CLI\n' )
+	CLI( net )
+
+	info( '*** Stopping network' )
     net.stop()
 
 if __name__ == '__main__':
