@@ -37,7 +37,7 @@ def projectNet():
     info( '*** Adding hosts\n' )
     Clients = []
     Servers = []
-    Ips = ['1.1.1.2/30', '2.2.1.2/30', '3.3.1.2/30', '1.1.2.2/30', '2.2.2.2/30', '3.3.2.2/30']
+    Ips = ['10.0.0.1/24', '10.0.0.2/24', '10.0.0.3/24', '10.0.0.4/24', '10.0.0.5/24', '10.0.0.6/24']
     Macs = ['00:00:00:00:00:01', '00:00:00:00:00:02', '00:00:00:00:00:03', '00:00:00:00:00:04', '00:00:00:00:00:05', '00:00:00:00:00:06', '00:00:00:00:00:07', '00:00:00:00:00:08', '00:00:00:00:00:09']
     for i in range(1,number_components+1):
      	client = net.addHost( 'client%d' % i, mac=Macs[i-1], ip=Ips[i-1] )
@@ -54,28 +54,17 @@ def projectNet():
 
     info( '*** Creating links\n' )
     for i in range (number_components):
-      net.addLink(Clients[i], Switches[i], bw=0.03)
-      net.addLink(Servers[i], Switches[i], bw=0.03)
+      net.addLink(Clients[i], Switches[i])
+      net.addLink(Servers[i], Switches[i])
     for i in range (number_components):
       net.addLink(Switches[i%3], Switches[(i+1)%3])
 
-    info( '*** Starting network\n')
-    net.start()
-
     info('***Setting switches to openflow 1.3\n')
     for i in range(number_components):
-      Switches[i].cmd('ovs-vsctl set bridge switch%d protocols=OpenFlow13' % (i+1) )
+      Switches[i].cmd('ovs-vsctl set Bridge switch%d protocols=OpenFlow13' % (i+1) )
 
-    info('***Setting hosts eth0 up\n')
-    for i in range(number_components):
-      Clients[i].cmd("ifconfig client%d-eth0 up" % (i+1))
-      Servers[i].cmd("ifconfig server%d-eth0 up" % (i+1))
-    
-    info('***Setting hosts routes\n')
-    IpsGateways = ['1.1.1.1', '2.2.1.1', '3.3.1.1', '1.1.2.1', '2.2.2.1', '3.3.2.1']
-    for i in range(number_components):
-      Clients[i].cmd("ip route add default via %s" % IpsGateways[i])
-      Servers[i].cmd("ip route add default via %s" % IpsGateways[i+3])
+    info( '*** Starting network\n')
+    net.start()
 
     info( '*** Running CLI\n' )
     CLI( net )
