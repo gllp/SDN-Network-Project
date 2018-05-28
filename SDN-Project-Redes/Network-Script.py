@@ -57,7 +57,7 @@ def projectNet():
       net.addLink(Clients[i], Switches[i], bw=0.03)
       net.addLink(Servers[i], Switches[i], bw=0.03)
     for i in range (number_components):
-      net.addLink(Switches[i%3], Switches[(i+1)%3])
+      net.addLink(Switches[i%3], Switches[(i+1)%3], bw=0.03)
 
     info( '*** Starting network\n')
     net.start()
