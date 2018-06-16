@@ -117,11 +117,11 @@ def projectNet():
     
     #threadNetServer.start()
     
-    #info( '*** Running CLI\n' )
-    #CLI( net )
+    info( '*** Running CLI\n' )
+    CLI( net )
 
-    info('***Calling Net_Server\n')
-    net_server(net)
+    #info('***Calling Net_Server\n')
+    #net_server(net)
 
     info( '*** Stopping network' )
     net.stop()

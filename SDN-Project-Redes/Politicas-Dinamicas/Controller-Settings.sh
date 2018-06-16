@@ -23,7 +23,7 @@ curl -X POST -d '{"gateway":"14.14.14.2"}' http://localhost:8080/router/00000000
 
 #Adjusting servers links
 sudo ovs-ofctl -O OpenFlow13 add-flow switch1 priority=65535,in_port=2,ip,nw_dst=3.3.2.2,actions=drop
-sudo ovs-ofctl -O OpenFlow13 add-flow switch2 priority=65535,in_port=2,ip,nw_dst=1.1.2.2,actions=drop
+#sudo ovs-ofctl -O OpenFlow13 add-flow switch2 priority=65535,in_port=2,ip,nw_dst=1.1.2.2,actions=drop
 sudo ovs-ofctl -O OpenFlow13 add-flow switch3 priority=65535,in_port=2,ip,nw_dst=2.2.2.2,actions=drop
 
 #Removing server1 links to clients
