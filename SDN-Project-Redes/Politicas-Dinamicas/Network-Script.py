@@ -23,7 +23,7 @@ from mininet.log import setLogLevel, info
 from mininet.link import Link, TCLink
 from threading import Thread
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from argparse import ArgumentParser
 import os
 import subprocess
@@ -54,16 +54,26 @@ def set_time_policy(times, controller):
     start_time = datetime.strptime(now + ' ' + times.start_time[0], "%d/%m/%Y %H:%M")
     end_time = datetime.strptime(now + ' ' + times.end_time[0], "%d/%m/%Y %H:%M")
 
+    print(start_time)
+    print(end_time)
+    print(current_time)
+
+    print(current_time > start_time)
+    print(current_time < end_time)
+    print(not(new_rule_set))
+
+    print((current_time > start_time) and (current_time < end_time) and (not(new_rule_set)))
+
     while(1):
         current_time = datetime.now()
-        if ((current_time > start_time) and (current_time < end_time) and not(new_rule_set)):
+        if ((current_time > start_time) and (current_time < end_time) and (not(new_rule_set))):
             controller.cmdPrint("./SettingRules.sh")
             new_rule_set = True
 
         elif((current_time > end_time) and (new_rule_set)):
             controller.cmdPrint("./RemovingRules.sh")
-            start_time = start_time + datetime.timedelta(days=1)
-            end_time = end_time + datetime.timedelta(days=1)
+            start_time = start_time + timedelta(days=1)
+            end_time = end_time + timedelta(days=1)
             new_rule_set = False
 
 def CLI_Control(net):
