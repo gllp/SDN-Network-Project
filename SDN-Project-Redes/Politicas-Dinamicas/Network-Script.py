@@ -25,7 +25,10 @@ from threading import Thread
 import time
 from datetime import datetime
 from argparse import ArgumentParser
+import os
+import subprocess
 
+#Getting time arguments for servers' policies
 def getTime():
     parser = ArgumentParser()
     parser.add_argument("start_time", 
@@ -41,56 +44,27 @@ def getTime():
 
     return times
 
+#Setting time policies for servers
 def set_time_policy(times, controller):
     new_rule_set = False
     current_time = datetime.now()
 
-    now = datetime.day + '/' datetime.month + '/' + datetime.year
+    now = str(current_time.day) + '/' + str(current_time.month) + '/' + str(current_time.year)
 
     start_time = datetime.strptime(now + ' ' + times.start_time[0], "%d/%m/%Y %H:%M")
     end_time = datetime.strptime(now + ' ' + times.end_time[0], "%d/%m/%Y %H:%M")
-    
+
     while(1):
         current_time = datetime.now()
-        if (current_time > start_time && current_time < end_time && not(new_rule_set)):
+        if ((current_time > start_time) and (current_time < end_time) and not(new_rule_set)):
             controller.cmdPrint("./SettingRules.sh")
             new_rule_set = True
 
-        elif(current_time > end_time && new_rule_set):
+        elif((current_time > end_time) and (new_rule_set)):
             controller.cmdPrint("./RemovingRules.sh")
             start_time = start_time + datetime.timedelta(days=1)
             end_time = end_time + datetime.timedelta(days=1)
             new_rule_set = False
-
-def net_server(net):
-    IpsDic = {'client1':'1.1.1.2', 'client2':'2.2.1.2', 'client3':'3.3.1.2'}
-    while(1):
-        option = int(raw_input("Menu:\n1-Talk\n2-Listen\n3-Exit\n"))
-        if (option == 1):
-            source = raw_input("Digite a fonte:\n")
-            destination = raw_input("Digite o destino:\n")
-            duration = int(raw_input("Digite a duracao da conexao:\n"))
-
-            ip = IpsDic[destination]
-
-            client = net.get(source)
-
-            client.cmdPrint("sudo python talk.py %s %d" % (ip, duration))
-
-        elif (option == 2):
-            source = raw_input("Digite o cliente:\n")
-    
-            client = net.get(source)
-
-            print("To aqui :D :D !!\n")
-
-            client.cmdPrint("sudo python listen.py &")
-
-            print("Saiu\n")
-
-        else:
-            print("Entrou!!!")
-            break
 
 def CLI_Control(net):
     info( '*** Running CLI\n' )
@@ -151,20 +125,36 @@ def projectNet(times):
       Clients[i].cmd("ip route add default via %s" % IpsGateways[i])
       Servers[i].cmd("ip route add default via %s" % IpsGateways[i+3])
 
-    info('***Initializing Threads\n')
-    threadNetServer = Thread(target=net_server, args=[net])
-    threadSetTimePolicy = Thread(target=set_time_policy, args=[times]) 
+    info('***Running configs switches\n')
+    for i in range(number_components):
+        Switches[i].cmdPrint('./QoSSwitchConfig.sh')
 
-    threadNetServer.start()
+    #info('***Opening xterms\n')
+    #cliTest = CLI( net )
+    #cliTest.do_xterm('c0 server1 server2')
+
+    #info('***Running configs QosControllerConfig\nCreating new qos_rest_router.py file\nInstalling file\nRunning QoS files\n')
+    #Controller0.sendCmd('./QoSControllerConfig.sh')
+    #subprocess.call('./QoSControllerConfig.sh')
+
+    #Thread CLI Start
+    threadCLI = Thread(target=CLI_Control, args=[net])
+    threadCLI.start()
+
+    time.sleep(180)
+
+    #info('***Running Controller-Settings\n')
+    #Controller0.cmdPrint('./Controller-Settings.sh')
+
+    info('***Initializing Threads\n')
+    threadSetTimePolicy = Thread(target=set_time_policy, args=[times, Controller0]) 
+
     threadSetTimePolicy.start()
     
-    threadNetServer.join()
+    threadCLI.join()
 
     #info( '*** Running CLI\n' )
     #CLI( net )
-
-    #info('***Calling Net_Server\n')
-    #net_server(net)
 
     info( '*** Stopping network' )
     net.stop()
