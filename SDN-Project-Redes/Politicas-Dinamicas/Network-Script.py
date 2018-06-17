@@ -22,6 +22,45 @@ from mininet.cli import CLI
 from mininet.log import setLogLevel, info
 from mininet.link import Link, TCLink
 from threading import Thread
+import time
+from datetime import datetime
+from argparse import ArgumentParser
+
+def getTime():
+    parser = ArgumentParser()
+    parser.add_argument("start_time", 
+                        nargs=1, 
+                        help="Receiving Start Time", 
+                        metavar="START_TIME")
+    parser.add_argument("end_time", 
+                        nargs=1,
+                        help="Receiving End Time", 
+                        metavar="END_TIME")
+
+    times = parser.parse_args()
+
+    return times
+
+def set_time_policy(times, controller):
+    new_rule_set = False
+    current_time = datetime.now()
+
+    now = datetime.day + '/' datetime.month + '/' + datetime.year
+
+    start_time = datetime.strptime(now + ' ' + times.start_time[0], "%d/%m/%Y %H:%M")
+    end_time = datetime.strptime(now + ' ' + times.end_time[0], "%d/%m/%Y %H:%M")
+    
+    while(1):
+        current_time = datetime.now()
+        if (current_time > start_time && current_time < end_time && not(new_rule_set)):
+            controller.cmdPrint("./SettingRules.sh")
+            new_rule_set = True
+
+        elif(current_time > end_time && new_rule_set):
+            controller.cmdPrint("./RemovingRules.sh")
+            start_time = start_time + datetime.timedelta(days=1)
+            end_time = end_time + datetime.timedelta(days=1)
+            new_rule_set = False
 
 def net_server(net):
     IpsDic = {'client1':'1.1.1.2', 'client2':'2.2.1.2', 'client3':'3.3.1.2'}
@@ -57,7 +96,7 @@ def CLI_Control(net):
     info( '*** Running CLI\n' )
     CLI( net )
 
-def projectNet():
+def projectNet(times):
 
     "Create an empty network and add nodes to it."
 
@@ -112,13 +151,17 @@ def projectNet():
       Clients[i].cmd("ip route add default via %s" % IpsGateways[i])
       Servers[i].cmd("ip route add default via %s" % IpsGateways[i+3])
 
-    #info('***Initializing Threads\n')
-    #threadNetServer = Thread(target=net_server, args=[net])
+    info('***Initializing Threads\n')
+    threadNetServer = Thread(target=net_server, args=[net])
+    threadSetTimePolicy = Thread(target=set_time_policy, args=[times]) 
+
+    threadNetServer.start()
+    threadSetTimePolicy.start()
     
-    #threadNetServer.start()
-    
-    info( '*** Running CLI\n' )
-    CLI( net )
+    threadNetServer.join()
+
+    #info( '*** Running CLI\n' )
+    #CLI( net )
 
     #info('***Calling Net_Server\n')
     #net_server(net)
@@ -127,5 +170,6 @@ def projectNet():
     net.stop()
 
 if __name__ == '__main__':
+    times = getTime()
     setLogLevel( 'info' )
-    projectNet()
+    projectNet(times)
