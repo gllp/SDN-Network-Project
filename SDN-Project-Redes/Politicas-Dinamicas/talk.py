@@ -19,21 +19,25 @@ def getArguments():
 	return args
 
 def connect(args):
+	IpsDic = {'client1':'1.1.1.2', 'client2':'2.2.1.2', 'client3':'3.3.1.2'}
+	Ip = IpsDic[args.destination[0]]
+
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 	try:
-		s.connect((args.destination[0],1234))
+		s.connect((Ip,1234))
 	except socket.error as e:
 		print(e)
 		exit(0)
 
-	print("conectou :D !")
+	print("Connected")
 
 	start_time = time.time()
 	#your code
 	while ((time.time() - start_time) < args.duration[0]):
-		s.send("ferias")
-		print("mandei :) !")
+		s.send("Data")
+
+	print("Connection Closed")
 
 	s.close()
 

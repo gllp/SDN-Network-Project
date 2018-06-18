@@ -54,16 +54,6 @@ def set_time_policy(times, controller):
     start_time = datetime.strptime(now + ' ' + times.start_time[0], "%d/%m/%Y %H:%M")
     end_time = datetime.strptime(now + ' ' + times.end_time[0], "%d/%m/%Y %H:%M")
 
-    print(start_time)
-    print(end_time)
-    print(current_time)
-
-    print(current_time > start_time)
-    print(current_time < end_time)
-    print(not(new_rule_set))
-
-    print((current_time > start_time) and (current_time < end_time) and (not(new_rule_set)))
-
     while(1):
         current_time = datetime.now()
         if ((current_time > start_time) and (current_time < end_time) and (not(new_rule_set))):
@@ -147,14 +137,14 @@ def projectNet(times):
     #Controller0.sendCmd('./QoSControllerConfig.sh')
     #subprocess.call('./QoSControllerConfig.sh')
 
+    #info('***Running Controller-Settings\n')
+    #Controller0.cmdPrint('./Controller-Settings.sh')
+
     #Thread CLI Start
     threadCLI = Thread(target=CLI_Control, args=[net])
     threadCLI.start()
 
     time.sleep(180)
-
-    #info('***Running Controller-Settings\n')
-    #Controller0.cmdPrint('./Controller-Settings.sh')
 
     info('***Initializing Threads\n')
     threadSetTimePolicy = Thread(target=set_time_policy, args=[times, Controller0]) 

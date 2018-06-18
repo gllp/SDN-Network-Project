@@ -23,7 +23,7 @@ echo "Setting Gateways For Each Switch"
 
 #Adjusting servers links
 ovs-ofctl -O OpenFlow13 add-flow switch1 priority=65535,in_port=2,ip,nw_dst=3.3.2.2,actions=drop
-#ovs-ofctl -O OpenFlow13 add-flow switch2 priority=65535,in_port=2,ip,nw_dst=1.1.2.2,actions=drop
+ovs-ofctl -O OpenFlow13 add-flow switch2 priority=65535,in_port=2,ip,nw_dst=1.1.2.2,actions=drop
 ovs-ofctl -O OpenFlow13 add-flow switch3 priority=65535,in_port=2,ip,nw_dst=2.2.2.2,actions=drop
 
 echo "Adding Flow Rules For Each Switch To Guarantee Each Server i%3 Only Communicates With Server (i+1)%3"

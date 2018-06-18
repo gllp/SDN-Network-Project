@@ -9,33 +9,28 @@ def connect():
 
 	variavel = (host, port)
 
-
-	print("cheguei1")
-
 	try:
 		s.bind( variavel )
 	except socket.error as e:
 		print (e)
 		exit(0)
 
-	print("cheguei2")
+	print("Waiting Connection")
 	s.listen(1)
 	
-	print("cheguei3")
-
 	while (1):
 		conn, adr = s.accept()
-		print("cheguei4")
+		print("Accepted Connection")
 
-		while(1):
+		recpt = "begin"
+		while(not(recpt == "")):
 			try:
 				recpt = conn.recv(1024)
-				print(recpt)
 			except socket.error as e:
-				print("Deu ruim!!!!!")
+				print("Error!")
 				break
 
-		print("acabou")
+		print("Connection Ended")
 
 
 if __name__ == '__main__':
