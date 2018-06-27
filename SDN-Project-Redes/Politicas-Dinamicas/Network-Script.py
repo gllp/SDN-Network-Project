@@ -129,22 +129,15 @@ def projectNet(times):
     for i in range(number_components):
         Switches[i].cmdPrint('./QoSSwitchConfig.sh')
 
-    #info('***Opening xterms\n')
-    #cliTest = CLI( net )
-    #cliTest.do_xterm('c0 server1 server2')
-
-    #info('***Running configs QosControllerConfig\nCreating new qos_rest_router.py file\nInstalling file\nRunning QoS files\n')
-    #Controller0.sendCmd('./QoSControllerConfig.sh')
-    #subprocess.call('./QoSControllerConfig.sh')
-
-    #info('***Running Controller-Settings\n')
-    #Controller0.cmdPrint('./Controller-Settings.sh')
-
     #Thread CLI Start
     threadCLI = Thread(target=CLI_Control, args=[net])
     threadCLI.start()
 
+    info('***Please, open c0 xterm terminal and run ./QoSControllerConfig.sh\n')
     time.sleep(180)
+
+    info('***Running Controller-Settings\n')
+    Controller0.cmdPrint('./Controller-Settings.sh')
 
     info('***Initializing Threads\n')
     threadSetTimePolicy = Thread(target=set_time_policy, args=[times, Controller0]) 
@@ -152,9 +145,6 @@ def projectNet(times):
     threadSetTimePolicy.start()
     
     threadCLI.join()
-
-    #info( '*** Running CLI\n' )
-    #CLI( net )
 
     info( '*** Stopping network' )
     net.stop()

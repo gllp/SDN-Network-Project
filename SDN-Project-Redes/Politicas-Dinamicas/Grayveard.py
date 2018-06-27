@@ -37,4 +37,12 @@ def net_server(net):
 threadNetServer = Thread(target=net_server, args=[net])
 threadNetServer.start()
 
+#info('***Running configs QosControllerConfig\nCreating new qos_rest_router.py file\nInstalling file\nRunning QoS files\n')
+#Controller0.sendCmd('./QoSControllerConfig.sh')
+#subprocess.call('./QoSControllerConfig.sh')
+
+#info('***Opening xterms\n')
+#cliTest = CLI( net )
+#cliTest.do_xterm('c0 server1 server2')
+
 '''
